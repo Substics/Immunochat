@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Page</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+      }
+      .login-container,
+      .admin-container {
+        max-width: 400px;
+        margin: 100px auto;
+        padding: 20px;
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      .login-container h2,
+      .admin-container h2 {
+        margin-bottom: 20px;
+      }
+      .login-container input[type="text"],
+      .login-container input[type="password"],
+      .admin-container input[type="text"] {
+        width: calc(100% - 22px);
+        padding: 10px;
+        margin-bottom: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+      }
+      .login-container button,
+      .admin-container button {
+        width: 100%;
+        padding: 10px;
+        background-color: #007bff;
+        border: none;
+        color: white;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      .admin-container .button-group {
+        margin-bottom: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="login-container">
+      <h2>Login</h2>
+      <input type="text" id="username" placeholder="Username" />
+      <input type="password" id="password" placeholder="Password" />
+      <button onclick="login()">Login</button>
+    </div>
+    <div class="admin-container" style="display: none">
+      <h2>Admin Page</h2>
+      <div class="button-group">
+        <button onclick="showAlert('textbox1')">Button 1</button>
+        <input type="text" id="textbox1" placeholder="Text 1" />
+      </div>
+      <div class="button-group">
+        <button onclick="showAlert('textbox2')">Button 2</button>
+        <input type="text" id="textbox2" placeholder="Text 2" />
+      </div>
+      <div class="button-group">
+        <button onclick="showAlert('textbox3')">Button 3</button>
+        <input type="text" id="textbox3" placeholder="Text 3" />
+      </div>
+    </div>
+
+    <script>
+      function login() {
+        var username = document.getElementById("username").value;
+        var password = document.getElementById("password").value;
+
+        if (username === "admin" && password === "yalfara") {
+          document.querySelector(".login-container").style.display = "none";
+          document.querySelector(".admin-container").style.display = "block";
+        } else {
+          alert("Invalid login credentials!");
+        }
+      }
+
+      function showAlert(textboxId) {
+        var text = document.getElementById(textboxId).value;
+        alert(text);
+      }
+    </script>
+  </body>
+</html>
