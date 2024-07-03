@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Immuno Chat</title>
+    <link rel="shortcut icon" type="image/x-icon" href="/Logo.ico" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
+    <style>
+      #user-count {
+        font-family: Helvetica;
+        font-size: 20px;
+      }
+      #sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 200px;
+        height: 100%;
+        background: #f4f4f4;
+        padding: 10px;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        overflow-y: auto;
+      }
+      #chat-container {
+        margin-left: 220px;
+      }
+      .user-list-item {
+        cursor: pointer;
+      }
+      #color-display {
+        width: 20px;
+        height: 20px;
+        display: inline-block;
+        margin-left: 10px;
+        border: 1px solid #000;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="sidebar">
+      <h3>Connected Users</h3>
+      <ul id="user-list"></ul>
+      <div id="color-wheel-container" style="margin-top: 20px">
+        <input type="color" id="color-wheel" />
+        <div id="color-display"></div>
+      </div>
+    </div>
+    <div id="chat-container">
+      <center>
+        <h1
+          style="
+            font-family: &quot;Lato&quot;, sans-serif;
+            -ms-user-select: none;
+            user-select: none;
+          ">Immuno Chat</h1>
+        <p style="font-family: Helvetica">
+          Your Username is: <span id="username-display"></span>
+        </p>
+        <p id="chatting-with" style="font-family: Helvetica"></p>
+        <hr style="border: 1% solid black" />
+      </center>
+      <button
+        type="button"
+        onclick="returnToMainChat()"
+        style="
+          width: 10%;
+          font-size: 20px;
+          z-index: 1;
+          margin-left: auto;
+          margin-right: auto;
+          display: block;
+          margin-top: 10px;
+        ">Main Chat</button>
+      <br/>
+      <input
+        type="text"
+        name="name"
+        id="textbox"
+        value=""
+        autocomplete="off"
+        style="
+          width: 60%;
+          font-size: 20px;
+          z-index: 1;
+          margin-left: auto;
+          margin-right: auto;
+          display: block;
+        "
+        onkeydown="if (event.key === 'Enter') enter()"
+      />
+      <div id="chat" style="margin-top: 20px"></div>
+    </div>
+    <script>
+      let username;
+      do {
+        username = prompt("Enter Username:");
+        if (username) {
+          username = username.trim();
+        }
+      } while (!username || username.length < 2 || username.length > 20 || username.includes("¬"));
+      document.getElementById("username-display").innerText = username;
+
+      let userCol = "#000000";
+      document.addEventListener("DOMContentLoaded", () => {
+        const colorWheel = document.getElementById("color-wheel");
+        const colorDisplay = document.getElementById("color-display");
+
+        colorWheel.addEventListener("input", (e) => {
+          userCol = e.target.value;
+          colorDisplay.style.backgroundColor = userCol;
+        });
+      });
+
+      const socket = io({query: `username=${username}`});
+
+      socket.on("message", function(msg) {
+        const split = msg.split("¬");
+        const chat = document.getElementById("chat");
+        chat.innerHTML =
+          `<div class='chatmessage' style='font-size:23px; color:${split[1]}'> ${split[0]} </div>` +
+          chat.innerHTML;
+      });
+
+      socket.on("update_user_list", function(users) {
+        const userList = document.getElementById("user-list");
+        userList.innerHTML = "";
+        users.forEach((user) => {
+          const userItem = document.createElement("li");
+          userItem.innerText = user;
+          userItem.className = "user-list-item";
+          userItem.onclick = () => selectUser(user);
+          userList.appendChild(userItem);
+        });
+      });
+
+      socket.on("private_message", function(msg) {
+        const chat = document.getElementById("chat");
+        chat.innerHTML =
+          `<div class='chatmessage' style='font-size:23px; color:green'> [Private] ${msg} </div>` +
+          chat.innerHTML;
+      });
+
+      function enter() {
+        const textBox = document.getElementById("textbox");
+        const message = textBox.value;
+        if (message.trim() !== "") {
+          textBox.value = "";
+
+          const time = new Date().toLocaleTimeString().split(":");
+          if (selectedUser) {
+            sendPrivateMessage(message);
+          } else {
+            socket.send(
+              `<b>[${username}]: </b> ${message} <span style='color:grey;'> [${time[0]}:${time[1]}]</span>¬${userCol}`,
+            );
+          }
+        }
+      }
+
+      let selectedUser = null;
+      function selectUser(user) {
+        selectedUser = user;
+        document.getElementById("chatting-with").innerText =
+          `Chatting with: ${user}`;
+      }
+
+      function sendPrivateMessage(message) {
+        if (selectedUser && message.trim() !== "") {
+          const time = new Date().toLocaleTimeString().split(":");
+          socket.emit("private_message", {
+            recipient: selectedUser,
+            msg: `<b>[${username}]: </b> ${message} <span style='color:grey;'> [${time[0]}:${time[1]}]</span>`,
+          });
+        }
+      }
+
+      function returnToMainChat() {
+        selectedUser = null;
+        document.getElementById("chatting-with").innerText = "";
+      }
+    </script>
+  </body>
+</html>
