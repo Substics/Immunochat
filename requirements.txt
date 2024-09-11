@@ -1,0 +1,5 @@
+Flask==2.3.2  # Flask framework
+Flask-SocketIO==5.3.3  # SocketIO integration for Flask
+python-socketio==5.7.2  # Python client/server for Socket.IO
+python-engineio==4.3.3  # Engine.IO implementation used by Socket.IO
+eventlet==0.33.3  # Alternative to default threading in Socket.IO (required by Flask-SocketIO)
